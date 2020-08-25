@@ -4,7 +4,7 @@
 import torch
 import gym
 from magic.lib_cm import logger
-from agent.cart_pole_agent import CartPoleAgent
+from agent.agent import Agent
 
 _logger = logger.get_logger(__name__)
 env = gym.make('CartPole-v0')
@@ -14,7 +14,7 @@ _logger.pr(f'Number of actions: {env.action_space.n} ')
 
 state = env.reset()
 
-agent = CartPoleAgent(state_size=4, action_size=2, seed=0)
+agent = Agent(state_size=4, action_size=2, seed=0)
 
 agent.qnetwork_local.load_state_dict(
     torch.load("models/cart_pole.pth", map_location=torch.device('cpu')))

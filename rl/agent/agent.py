@@ -1,5 +1,5 @@
 import torch
-from net.net import QNetwork
+from rl.net.net import QNetwork
 import random
 import torch.optim as optim
 import numpy as np
@@ -21,7 +21,7 @@ UPDATE_EVERY = 4  # how often to update the network
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-class LunarLanderAgent(object):
+class Agent(object):
     """Interacts with and learns from the environment."""
 
     def __init__(self, state_size, action_size, seed):
@@ -44,6 +44,7 @@ class LunarLanderAgent(object):
 
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, seed)
+
         # Initialize time step (for updating every UPDATE_EVERY steps)
         self.t_step = 0
 
@@ -163,8 +164,9 @@ class ReplayBuffer:
             np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(
             device)
 
-        return (states, actions, rewards, next_states, dones)
+        return states, actions, rewards, next_states, dones
 
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
+
