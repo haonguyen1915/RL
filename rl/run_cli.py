@@ -14,7 +14,7 @@ def entry_point():
 @click.command()
 @click.option('--net', '-n', 'net',
               type=click.Choice(['sarsa', 'dqn', 'double_dqn', 'per_dqn', 'q-learning',
-                                 'dual_dqn', 'dual_double_dqn', 'dqn_cnn', 'noise_dqn',
+                                 'duel_dqn', 'duel_double_dqn', 'dqn_cnn', 'noise_dqn',
                                  'dp_dqn', 'rainbow_dq']),
               default='sarsa',
               show_default=True,
@@ -39,10 +39,10 @@ def run(net, mode, env):
         dqn_trainer = trainer.DoubleDQNTrainer(env=env)
     elif net == 'per_dqn':
         dqn_trainer = trainer.PerDQNTrainer(env=env)
-    elif net == 'dual_dqn':
-        dqn_trainer = trainer.DualDQNTrainer(env=env)
-    elif net == 'dual_double_dqn':
-        dqn_trainer = trainer.DualDoubleDQNTrainer(env=env)
+    elif net == 'duel_dqn':
+        dqn_trainer = trainer.DuelDQNTrainer(env=env)
+    elif net == 'duel_double_dqn':
+        dqn_trainer = trainer.DuelDoubleDQNTrainer(env=env)
     elif net == 'noise_dqn':
         dqn_trainer = trainer.NoiseDQNTrainer(env=env)
     elif net == 'dp_dqn':

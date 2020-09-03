@@ -1,5 +1,5 @@
 from rl.net.net import CnnDQN
-from .memory import ReplayBuffer
+from rl.memory.memory import ReplayBuffer
 import numpy as np
 import random
 import torch
@@ -31,7 +31,7 @@ class CnnDQNAgent(Agent):
             action_size (int): dimension of each action
             seed (int): random seed
         """
-        super(CnnDQNAgent, self).__init__(state_size, action_size, seed)
+        super(CnnDQNAgent, self).__init__(state_size, action_size)
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(seed)

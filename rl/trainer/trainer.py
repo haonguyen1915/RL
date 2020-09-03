@@ -1,7 +1,8 @@
 from rl.agent.agent import Agent
 from rl.agent.dynamic_programing.q_learning_agent import QLearningAgent
 from rl.agent.dynamic_programing.sarsa_agent import SarsaAgent
-from rl.agent import *
+from rl.agent.DeepDQN.dqn_agent import *
+from rl.agent.DeepDQN.dqn_cnn_agent import *
 import gym
 from collections import namedtuple, deque
 import numpy as np
@@ -297,18 +298,18 @@ class PerDQNTrainer(DQNTrainer):
             self.agent = PerDQNAgent(self.state_size, self.action_size, 777)
 
 
-class DualDQNTrainer(DQNTrainer):
+class DuelDQNTrainer(DQNTrainer):
     def __init__(self, agent=None, env='CartPole-v0', **kwargs):
-        super(DualDQNTrainer, self).__init__(agent, env, **kwargs)
+        super(DuelDQNTrainer, self).__init__(agent, env, **kwargs)
         if agent is not None:
             raise NotImplementedError
         else:
             self.agent = DualDQNAgent(self.state_size, self.action_size, 777)
 
 
-class DualDoubleDQNTrainer(DualDQNTrainer):
+class DuelDoubleDQNTrainer(DuelDQNTrainer):
     def __init__(self, agent=None, env='CartPole-v0', **kwargs):
-        super(DualDoubleDQNTrainer, self).__init__(agent, env, **kwargs)
+        super(DuelDoubleDQNTrainer, self).__init__(agent, env, **kwargs)
 
 
 class NoiseDQNTrainer(DQNTrainer):

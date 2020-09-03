@@ -100,11 +100,6 @@ class DQNAgent(Agent):
         # Get expected Q values from local model
         q_value = self.main_network(states).gather(1, actions)
 
-        print(q_value.size())
-        print(actions.size())
-        print(self.main_network(states).size())
-        exit()
-
         # Compute loss
         loss = F.mse_loss(q_value, expected_q_value)
         self.optimizer.zero_grad()
@@ -146,7 +141,7 @@ class DQNAgent(Agent):
 
 class DoubleDQNAgent(DQNAgent):
     def __init__(self, state_size, action_size, seed):
-        super(DoubleDQNAgent, self).__init__(state_size, action_size, seed)
+        super(DoubleDQNAgent, self).__init__(state_size, action_size)
 
     def train_step(self, experiences, gamma):
         """
@@ -250,7 +245,7 @@ class PerDQNAgent(DQNAgent):
 
 class DualDQNAgent(DQNAgent):
     def __init__(self, state_size, action_size, seed):
-        super(DualDQNAgent, self).__init__(state_size, action_size, seed)
+        super(DualDQNAgent, self).__init__(state_size, action_size)
         self.main_network = DuelingDQN(state_size, action_size).to(device)
         self.target_network = DuelingDQN(state_size, action_size).to(device)
         self.optimizer = optim.Adam(self.main_network.parameters(), lr=LR)
@@ -266,7 +261,7 @@ class DualDoubleDQNAgent(DoubleDQNAgent):
 
 class NoiseDQNAgent(DQNAgent):
     def __init__(self, state_size, action_size, seed):
-        super(NoiseDQNAgent, self).__init__(state_size, action_size, seed)
+        super(NoiseDQNAgent, self).__init__(state_size, action_size)
         self.main_network = NoisyDQN(state_size, action_size).to(device)
         self.target_network = NoisyDQN(state_size, action_size).to(device)
         self.optimizer = optim.Adam(self.main_network.parameters(), lr=LR)
