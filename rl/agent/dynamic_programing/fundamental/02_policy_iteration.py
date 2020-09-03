@@ -8,9 +8,6 @@ def policy_iter(env, gamma, theta):
 
     Params:
         env - environment with following required memebers:
-            state_size - number of states
-            env.nb_action - number of actions
-            env.model     - prob-transitions and rewards for all states and actions, see note #1
         gamma (float) - discount factor
         theta (float) - termination condition
     """
@@ -35,7 +32,7 @@ def policy_iter(env, gamma, theta):
         policy_stable = True
         for s in range(state_size):
             old_action = pi[s]
-            pi[s] = np.argmax([sum_sr(env, V=V, s=s, a=a, gamma=gamma)  # list comprehension
+            pi[s] = np.argmax([sum_sr(env, V=V, s=s, a=a, gamma=gamma)
                                for a in range(action_size)])
             if old_action != pi[s]: policy_stable = False
         if policy_stable: break
