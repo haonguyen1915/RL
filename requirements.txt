@@ -2,3 +2,4 @@ Box2D
 gym
 torch==1.3.0
 click
+atari-py
