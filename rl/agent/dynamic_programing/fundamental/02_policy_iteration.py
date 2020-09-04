@@ -26,7 +26,8 @@ def policy_iter(env, gamma, theta):
                 v = V[s]
                 V[s] = sum_sr(env, V=V, s=s, a=pi[s], gamma=gamma)
                 delta = max(delta, abs(v - V[s]))
-            if delta < theta: break
+            if delta < theta:
+                break
 
         # 3. Policy Improvement
         policy_stable = True
@@ -35,7 +36,8 @@ def policy_iter(env, gamma, theta):
             pi[s] = np.argmax([sum_sr(env, V=V, s=s, a=a, gamma=gamma)
                                for a in range(action_size)])
             if old_action != pi[s]: policy_stable = False
-        if policy_stable: break
+        if policy_stable:
+            break
 
     return V, pi
 

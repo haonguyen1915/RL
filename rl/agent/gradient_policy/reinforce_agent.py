@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import os
 from torch import optim
-from .agent import Agent
+from rl.agent.agent import Agent
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 1  # minibatch size

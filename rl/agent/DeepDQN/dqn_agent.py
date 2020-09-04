@@ -92,13 +92,13 @@ class DQNAgent(Agent):
 
         """
         states, actions, rewards, next_states, dones = experiences
+        # Get expected Q values from local model
+        q_value = self.main_network(states).gather(1, actions)
+
         # Get max predicted Q values (for next states) from target model
         next_q_value = self.target_network(next_states).detach().max(1)[0].unsqueeze(1)
         # Compute Q targets for current states
         expected_q_value = rewards + (gamma * next_q_value * (1 - dones))
-
-        # Get expected Q values from local model
-        q_value = self.main_network(states).gather(1, actions)
 
         # Compute loss
         loss = F.mse_loss(q_value, expected_q_value)
@@ -154,6 +154,8 @@ class DoubleDQNAgent(DQNAgent):
 
         """
         states, actions, rewards, next_states, dones = experiences
+        # Get expected Q values from local model
+        q_values = self.main_network(states).gather(1, actions)
 
         # Get max predicted Q values (for next states) from target model
         argmax_Q = self.main_network(next_states).max(1)[1].unsqueeze(1)
@@ -161,11 +163,6 @@ class DoubleDQNAgent(DQNAgent):
         # next_q_values = self.target_network(next_states).detach().max(1)[0].unsqueeze(1)
         next_q_values = self.target_network(next_states).gather(1, argmax_Q)
         expected_q_value = rewards + (gamma * next_q_values * (1 - dones))
-
-        # Get expected Q values from local model
-        q_values = self.main_network(states).gather(1, actions)
-        # print(q_values.size())
-        # print(actions.size())
 
         # Compute loss
         loss = F.mse_loss(q_values, expected_q_value)
@@ -208,19 +205,17 @@ class PerDQNAgent(DQNAgent):
         batch, batch_idx = experiences
         states, actions, rewards, next_states, dones = batch
 
+        # Get expected Q values from local model
+        q_values = self.main_network(states).gather(1, actions)
+
         # Get max predicted Q values (for next states) from target model
         next_q_values = self.target_network(next_states).detach().max(1)[0].unsqueeze(1)
         # Compute Q targets for current states
         expected_q_value = rewards + (gamma * next_q_values * (1 - dones))
 
-        # Get expected Q values from local model
-        q_values = self.main_network(states).gather(1, actions)
-
         # Compute loss
         loss = F.mse_loss(q_values, expected_q_value)
         td_error = expected_q_value - q_values
-        # print(td_error)
-        # exit()
         for i in range(BATCH_SIZE):
             val = abs(td_error[i].data[0])
             self.memory.update(batch_idx[i], val)

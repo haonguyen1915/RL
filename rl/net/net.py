@@ -112,8 +112,6 @@ class DuelingDQN(nn.Module):
 
     def forward(self, x):
         x = F.leaky_relu(self.fc1(x))
-        #        x = F.leaky_relu(self.fc2(x))
-        #        x = F.leaky_relu(self.fc3(x))
         x = F.leaky_relu(self.fc_h(x))
         v, a = self.fc_z_v(x), self.fc_z_a(x)  # Calculate value and advantage streams
         a_mean = torch.stack(a.chunk(self.action_space, 1), 1).mean(1)

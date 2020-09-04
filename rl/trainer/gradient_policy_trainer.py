@@ -1,5 +1,5 @@
 from .trainer import Trainer
-from rl.agent.reinforce_agent import ReinforceAgent, A2CAgent
+from rl.agent.gradient_policy.reinforce_agent import ReinforceAgent, A2CAgent
 from collections import deque
 import numpy as np
 import torch
