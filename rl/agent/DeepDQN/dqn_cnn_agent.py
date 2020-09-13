@@ -1,5 +1,5 @@
 from rl.net.net import CnnDQN
-from rl.memory.memory import ReplayBuffer
+from rl.memory.memory_test import ReplayBuffer
 import numpy as np
 import random
 import torch

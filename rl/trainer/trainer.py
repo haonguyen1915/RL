@@ -1,7 +1,14 @@
 from rl.agent.agent import Agent
 from rl.agent.dynamic_programing.q_learning_agent import QLearningAgent
 from rl.agent.dynamic_programing.sarsa_agent import SarsaAgent
-from rl.agent.DeepDQN.dqn_agent import *
+from rl.agent.DeepDQN.dqn_agent import DQNAgent
+from rl.agent.DeepDQN.double_dqn_agent import DoubleDQNAgent
+from rl.agent.DeepDQN.per_dqn_agent import PerDQNAgent
+from rl.agent.DeepDQN.duel_dqn_agent import DualDQNAgent
+from rl.agent.DeepDQN.noise_dqn_agent import NoiseDQNAgent
+from rl.agent.DeepDQN.dist_perspective_dqn_agent import DistPerspectiveDQNAgent
+# from rl.agent.DeepDQN.dqn_agent import DistPerspectiveDQNAgent
+from rl.agent.DeepDQN.rain_bow_dqn_agent import RainBowAgent
 from rl.agent.DeepDQN.dqn_cnn_agent import *
 import gym
 from collections import namedtuple, deque
@@ -286,7 +293,7 @@ class DoubleDQNTrainer(DQNTrainer):
         if agent is not None:
             raise NotImplementedError
         else:
-            self.agent = DoubleDQNAgent(self.state_size, self.action_size, 777)
+            self.agent = DoubleDQNAgent(self.state_size, self.action_size)
 
 
 class PerDQNTrainer(DQNTrainer):
@@ -295,7 +302,7 @@ class PerDQNTrainer(DQNTrainer):
         if agent is not None:
             raise NotImplementedError
         else:
-            self.agent = PerDQNAgent(self.state_size, self.action_size, 777)
+            self.agent = PerDQNAgent(self.state_size, self.action_size)
 
 
 class DuelDQNTrainer(DQNTrainer):
@@ -304,7 +311,7 @@ class DuelDQNTrainer(DQNTrainer):
         if agent is not None:
             raise NotImplementedError
         else:
-            self.agent = DualDQNAgent(self.state_size, self.action_size, 777)
+            self.agent = DualDQNAgent(self.state_size, self.action_size)
 
 
 class DuelDoubleDQNTrainer(DuelDQNTrainer):
@@ -318,7 +325,7 @@ class NoiseDQNTrainer(DQNTrainer):
         if agent is not None:
             raise NotImplementedError
         else:
-            self.agent = NoiseDQNAgent(self.state_size, self.action_size, 777)
+            self.agent = NoiseDQNAgent(self.state_size, self.action_size)
         self.n_episodes = 10000
 
 

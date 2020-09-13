@@ -2,23 +2,22 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
-from .layers import NoisyLinear
+from rl.net.layers import NoisyLinear
 import math
 import numpy as np
+from torch.distributions import Categorical
 
 USE_CUDA = torch.cuda.is_available()
 
 
 class DQN(nn.Module):
-    """Actor (Policy) Model."""
-
     def __init__(self, state_size, action_size, fc1_units=64, fc2_units=64):
-        """Initialize parameters and build model.
-        Params
-        ======
+        """
+        Initialize parameters and build model.
+
+        Args:
             state_size (int): Dimension of each state
             action_size (int): Dimension of each action
-            seed (int): Random seed
             fc1_units (int): Number of nodes in first hidden layer
             fc2_units (int): Number of nodes in second hidden layer
         """
@@ -103,8 +102,6 @@ class DuelingDQN(nn.Module):
         super().__init__()
         self.state_space = state_size
         self.fc1 = nn.Linear(self.state_space, hidden_size)
-        #        self.fc2 = nn.Linear(hidden_size,hidden_size)
-        #        self.fc3 = nn.Linear(hidden_size,action_size)
         self.action_space = action_size
         self.fc_h = nn.Linear(hidden_size, hidden_size)
         self.fc_z_v = nn.Linear(hidden_size, 1)
@@ -245,26 +242,106 @@ class Reinforce(nn.Module):
         x = inputs
         x = F.relu(self.linear1(x))
         action_scores = self.linear2(x)
-        return F.softmax(action_scores)
+        return F.softmax(action_scores, dim=-1)
+
+
+class ReinforceBaseline(nn.Module):
+    def __init__(self, num_inputs, action_space):
+        super(ReinforceBaseline, self).__init__()
+        self.fc_shared = nn.Linear(num_inputs, 128)
+        self.fc_policy = nn.Linear(128, action_space)
+        self.fc_value_function = nn.Linear(128, 1)
+
+    def forward(self, x):
+        x = F.relu(self.fc_shared(x))
+        value = self.fc_value_function(x)
+        logits = self.fc_policy(x)
+        dist = Categorical(logits=logits)
+        return dist, value
+
+
+#
+# class ActorCritic(nn.Module):
+#     def __init__(self, num_inputs, num_actions, hidden_size=256, learning_rate=3e-4):
+#         super(ActorCritic, self).__init__()
+#
+#         self.num_actions = num_actions
+#         self.critic_linear1 = nn.Linear(num_inputs, hidden_size)
+#         self.critic_linear2 = nn.Linear(hidden_size, 1)
+#
+#         self.actor_linear1 = nn.Linear(num_inputs, hidden_size)
+#         self.actor_linear2 = nn.Linear(hidden_size, num_actions)
+#
+#     def forward(self, state):
+#         # state = Variable(torch.from_numpy(state).float().unsqueeze(0))
+#         value = F.relu(self.critic_linear1(state))
+#         value = self.critic_linear2(value)
+#
+#         policy_dist = F.relu(self.actor_linear1(state))
+#         policy_dist = F.softmax(self.actor_linear2(policy_dist), dim=1)
+#
+#         return value, policy_dist
 
 
 class ActorCritic(nn.Module):
-    def __init__(self, num_inputs, num_actions, hidden_size=256, learning_rate=3e-4):
+    def __init__(self, num_inputs, num_outputs, hidden_size=128, std=0.0):
         super(ActorCritic, self).__init__()
 
-        self.num_actions = num_actions
-        self.critic_linear1 = nn.Linear(num_inputs, hidden_size)
-        self.critic_linear2 = nn.Linear(hidden_size, 1)
+        self.critic = nn.Sequential(
+            nn.Linear(num_inputs, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, 1)
+        )
 
-        self.actor_linear1 = nn.Linear(num_inputs, hidden_size)
-        self.actor_linear2 = nn.Linear(hidden_size, num_actions)
+        self.actor = nn.Sequential(
+            nn.Linear(num_inputs, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, num_outputs),
+            nn.Softmax(),
+        )
 
-    def forward(self, state):
-        # state = Variable(torch.from_numpy(state).float().unsqueeze(0))
-        value = F.relu(self.critic_linear1(state))
-        value = self.critic_linear2(value)
+    def forward(self, x):
+        value = self.critic(x)
+        probs = self.actor(x)
+        dist = Categorical(probs)
+        return dist, value
 
-        policy_dist = F.relu(self.actor_linear1(state))
-        policy_dist = F.softmax(self.actor_linear2(policy_dist), dim=1)
 
-        return value, policy_dist
+class Actor(nn.Module):
+    def __init__(self, state_dim, n_actions):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(state_dim, 64),
+            nn.Tanh(),
+            nn.Linear(64, 32),
+            nn.Tanh(),
+            nn.Linear(32, n_actions),
+            nn.Softmax()
+        )
+
+    def forward(self, X):
+        return self.model(X)
+
+
+# Critic module
+class Critic(nn.Module):
+    def __init__(self, state_dim):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(state_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1)
+        )
+
+    def forward(self, X):
+        return self.model(X)
+
+
+if __name__ == "__main__":
+    model = Reinforce(4, 2, 16)
+    x = torch.rand((4, 4))
+    ot = model(x)
+    print(ot)
+    print(x.size())

@@ -63,6 +63,7 @@ class SarsaAgent(Agent):
         state, action, reward, next_state, done = experiences
         next_action = self.act(next_state, eps=0.1)
         old_q_value = self.q_table[state, action]
+
         new_q_value = self.q_table[next_state, next_action]
         new_value = (1 - self.alpha) * old_q_value + self.alpha * (reward + gamma * new_q_value)
         self.q_table[state, action] = new_value

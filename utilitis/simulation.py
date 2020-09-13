@@ -1,12 +1,8 @@
 from __future__ import print_function
 import numpy as np
-from collections import namedtuple
-from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
-import time
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from builtins import super
 from IPython.display import display, Image
 
 
@@ -72,7 +68,7 @@ def simulate_policy_gradient(update_fn, filename, init=[0.0] * 3):
     print('Done in %s iterations' % it)
 
 
-def update_known_optimal(actions):
+def update_known_optimal(actions, lr=0.5):
     # Each action has a .logit attribute that we must update. It also has a .grad attribute
     # that gives the gradient of the that action.
     actions[0].logit += lr * actions[0].grad
@@ -82,7 +78,23 @@ def update_known_optimal(actions):
     return 0, lr / 5
 
 
-def update_q_value_fixed(actions):
+def update_q_value(actions, lr=0.1):
+    i = np.random.choice(list(range(len(actions))))
+    # We add a significant amount of normally distributed noise to the action value,
+    # which is given to us in the q_val attribute.
+    value_est = actions[i].q_val + np.random.randn() * actions[i].q_val
+    actions[i].logit += lr * value_est * actions[i].grad
+    return i, lr * value_est / 10
+
+
+def update_q_value_bad(actions, lr=0.1):
+    i = np.random.choice(list(range(len(actions))), p=[e.value for e in actions])
+    q_value_est = actions[i].q_val + np.random.randn() * actions[i].q_val
+    actions[i].logit += lr * q_value_est * actions[i].grad
+    return i, lr * q_value_est / 5
+
+
+def update_q_value_fixed(actions, lr=0.1):
     i = np.random.choice(list(range(len(actions))), p=[e.value for e in actions])
     q_value_est = actions[i].q_val + np.random.randn() * actions[i].q_val
     actions[i].logit += lr * q_value_est * actions[i].grad / actions[i].value
@@ -90,8 +102,7 @@ def update_q_value_fixed(actions):
 
 
 if __name__ == "__main__":
-    lr = 0.5
-
-    simulate_policy_gradient(update_known_optimal, 'known_optimal.gif')
-    # lr = 0.1
-    # simulate_policy_gradient(update_q_value_fixed, 'final_policy_grad.gif', init=[0., 0.0, 1.5])
+    simulate_policy_gradient(update_known_optimal, '01_known_optimal.gif')
+    simulate_policy_gradient(update_q_value, '02_random_action.gif')
+    simulate_policy_gradient(update_q_value_bad, '03_bad.gif', init=[0., 0., 1.5])
+    simulate_policy_gradient(update_q_value_fixed, '04_final_policy_grad.gif', init=[0., 0.0, 1.5])

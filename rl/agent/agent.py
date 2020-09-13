@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import os
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -51,9 +52,24 @@ class Agent(object):
         raise NotImplementedError
 
     @staticmethod
-    def compute_returns(rewards, next_value, gamma=0.99, dones=None):
+    def compute_returns(rewards, next_value=0.0, gamma=0.99, dones=None):
+        """
+        Given a sequence of returns compute the vector of discounted returns
+        [G_0, G_1, ..., G_T].
+        Note that we alse use the trick of 'normalizing' the returns i.e.
+        we subtract the mean and divide by the standard deviation.
+
+        Args:
+            rewards:
+            next_value:
+            gamma:
+            dones:
+
+        Returns:
+
+        """
         if dones is not None:
-            masks = 1 - dones.squeeze(1).numpy()
+            masks = 1 - dones
         else:
             masks = np.ones_like(rewards)
         R = next_value
@@ -61,4 +77,9 @@ class Agent(object):
         for step in reversed(range(len(rewards))):
             R = rewards[step] + gamma * R * masks[step]
             returns.insert(0, R)
+
+        returns = np.array(returns)
+        returns -= returns.mean()
+        returns /= returns.std() if np.std(returns) > 0 else 1
         return returns
+

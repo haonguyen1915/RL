@@ -64,7 +64,7 @@ def run(net, mode, env):
 
 @click.command()
 @click.option('--net', '-n', 'net',
-              type=click.Choice(['reinforce', 'a2c']),
+              type=click.Choice(['reinforce', 'reinforce_baseline', 'a2c']),
               default='a2c',
               show_default=True,
               help="The net arch")
@@ -80,6 +80,8 @@ def run(net, mode, env):
 def run2(net, mode, env):
     if net == 'reinforce':
         dqn_trainer = gp_trainer.GradientPolicyTrainer(env=env)
+    elif net == 'reinforce_baseline':
+        dqn_trainer = gp_trainer.ReinforceBaselineTrainer(env=env)
     elif net == 'a2c':
         dqn_trainer = gp_trainer.A2CTrainer(env=env)
     else:

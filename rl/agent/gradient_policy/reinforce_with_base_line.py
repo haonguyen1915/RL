@@ -1,5 +1,4 @@
-from rl.net.net import Reinforce, ActorCritic
-from rl.memory.memory_test import Buffer
+from rl.net.net import ReinforceBaseline
 import numpy as np
 import torch
 import os
@@ -26,7 +25,7 @@ def t(arr):
     return torch.tensor(arr)
 
 
-class ReinforceAgent(Agent):
+class ReinforceBaselineAgent(Agent):
     """Interacts with and learns from the environment."""
 
     def __init__(self, state_size, action_size, **kwargs):
@@ -37,10 +36,10 @@ class ReinforceAgent(Agent):
             state_size (int): dimension of each state
             action_size (int): dimension of each action
         """
-        super(ReinforceAgent, self).__init__(state_size, action_size, **kwargs)
+        super(ReinforceBaselineAgent, self).__init__(state_size, action_size, **kwargs)
         # Replay memory
         self.memory = OnPolicyReplay(BUFFER_SIZE)
-        self.network = Reinforce(state_size, action_size)
+        self.network = ReinforceBaseline(state_size, action_size)
         self.optimizer = optim.Adam(self.network.parameters(), lr=LR)
         # Initialize time step (for updating every UPDATE_EVERY steps)
         self.t_step = 0
@@ -66,10 +65,11 @@ class ReinforceAgent(Agent):
         Returns:
 
         """
-
-        action_probs = self.network(torch.FloatTensor(state)).detach().numpy()
-        action = np.random.choice(self.action_size, p=action_probs)
-        return action
+        state = torch.from_numpy(state).float().to(device)
+        dist, value = self.network(state)
+        # sample an action from the distribution
+        action = dist.sample()
+        return action.numpy()
 
     def train_step(self, experiences, gamma):
         """
@@ -94,20 +94,30 @@ class ReinforceAgent(Agent):
             returns = self.compute_returns(rewards, 0.0, gamma, dones)
             returns_tensor = torch.tensor(returns)
 
+            # Compute the loss for gradient descent
             states = torch.tensor(states).float()
-            actions = torch.tensor(actions).long().unsqueeze(1)
+            actions = torch.tensor(actions).long()
 
-            log_probs = torch.log(self.network(states))
-            log_probs = log_probs.gather(1, actions).squeeze()
+            dist, values = self.network(states)
+            log_probs = dist.log_prob(actions)
 
-            # Calculate loss
-            #  multiply the log probabilities by the returns and sum
-            # (remember to multiply the result by -1 because we want to maximise the returns)
-            policy_loss = -torch.sum(log_probs * returns_tensor)
+            # compute the difference between the returns and the values
+            delta = returns_tensor - values
 
-            # update the policy parameters (gradient descent)
+            # compute the policy loss term. multiply the log probabilities by delta and sum
+            # (remeber to call .detach() on delta since we do not want the gradient to propogate
+            # to the value function network here)
+            policy_loss = -torch.sum(log_probs * delta.detach())
+
+            # compute the value function loss term
+            value_function_loss = 0.5 * torch.sum(delta ** 2)
+
+            # compute the composite loss
+            loss = policy_loss + value_function_loss
+
+            # update the policy and value function parameters
             self.optimizer.zero_grad()
-            policy_loss.backward()
+            loss.backward()
             self.optimizer.step()
 
     def save(self, model_path):
@@ -120,4 +130,3 @@ class ReinforceAgent(Agent):
             raise FileNotFoundError(f"File not found: {model_path}")
         self.network.load_state_dict(
             torch.load(model_path, map_location=torch.device('cpu')))
-

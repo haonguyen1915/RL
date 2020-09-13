@@ -63,5 +63,7 @@ if __name__ == "__main__":
     V, pi = value_iter(env, gamma=1.0, theta=1e-8)
     print(V.reshape([4, -1]))
     a2w = {0: '<', 1: 'v', 2: '>', 3: '^'}
-    policy_arrows = np.array([a2w[x] for x in pi])
+    policy_arrows_origin = np.array([a2w[x] for x in pi])
+    policy_arrows = np.array([x for x in pi])
+    print(np.array(policy_arrows_origin).reshape([-1, 4]))
     print(np.array(policy_arrows).reshape([-1, 4]))
